@@ -76,24 +76,24 @@ public class AddContactActivity extends AppCompatActivity {
         btnAddContact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(edtTxtContactName.getText().toString().trim().isEmpty()){
-                    Snackbar.make(v,"You must provide name.",Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                if (edtTxtContactName.getText().toString().trim().isEmpty()) {
+                    Snackbar.make(v, "You must provide name.", Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
 
                         }
                     }).show();
-                }else if(edtTxtContactNumber.getText().toString().trim().isEmpty()){
-                    Snackbar.make(v,"You must provide number.",Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                } else if (edtTxtContactNumber.getText().toString().trim().isEmpty()) {
+                    Snackbar.make(v, "You must provide number.", Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
 
                         }
                     }).show();
-                }else{
+                } else {
                     isButtonClicked = true;
                     snackView = v;
-                    inm.hideSoftInputFromWindow(v.getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
+                    inm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
                     addContact();
                 }
 
@@ -148,7 +148,9 @@ public class AddContactActivity extends AppCompatActivity {
     }
 
     private void uploadPhotoFromCamera() {
+
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
         startActivityForResult(intent, 2);
     }
 
@@ -173,8 +175,8 @@ public class AddContactActivity extends AppCompatActivity {
         }
     }
 
-    public void displayImageBitmap(String imagePath) {
-        File mediaFile = new File(imagePath);
+    public void displayImageBitmap(String image_path) {
+        File mediaFile = new File(image_path);
         Bitmap myBitmap = BitmapFactory.decodeFile(mediaFile.getAbsolutePath());
         int height = (myBitmap.getHeight() * 512 / myBitmap.getWidth());
         Bitmap scale = Bitmap.createScaledBitmap(myBitmap, 512, height, true);
@@ -317,7 +319,4 @@ public class AddContactActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onBackPressed() {
-    }
 }
