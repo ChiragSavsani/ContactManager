@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                AddContactActivity.isUpdate = false;
                 Intent goToAddContact = new Intent(MainActivity.this,AddContactActivity.class);
                 startActivity(goToAddContact);
             }
@@ -143,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                     }else{
                         continue;
                     }
-                    data.add(new ContactListDataEntities(contactImage, displayName,phoneNumber,email));
+                    data.add(new ContactListDataEntities(contact_id,contactImage, displayName,phoneNumber,email));
                     phoneNumber = "";
                     email = null;
                 }

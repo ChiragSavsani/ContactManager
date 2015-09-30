@@ -56,6 +56,9 @@ public class AddContactActivity extends AppCompatActivity {
     View snackView;
     Bitmap rotateBitmap;
     InputMethodManager inm;
+    public static boolean isUpdate;
+    String cID,cName,cNumber,cEmail;
+    Bitmap cPhoto;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -73,28 +76,61 @@ public class AddContactActivity extends AppCompatActivity {
         btnAddContact = (Button) findViewById(R.id.btnAddContact);
         inm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
+        if(isUpdate){
+            cID = getIntent().getExtras().getString("cID");
+            cName = getIntent().getExtras().getString("cName");
+            cNumber = getIntent().getExtras().getString("cNumber");
+            cEmail = getIntent().getExtras().getString("cEmail");
+            cPhoto = getIntent().getParcelableExtra("cPhoto");
+            btnAddContact.setText(getString(R.string.update_contact));
+            edtTxtContactName.setText(cName);
+            edtTxtContactNumber.setText(cNumber);
+            edtTxtContactEmail.setText(cEmail);
+            imgContactPhoto.setImageBitmap(cPhoto);
+        }else{
+            btnAddContact.setText(getString(R.string.add_contact));
+        }
         btnAddContact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (edtTxtContactName.getText().toString().trim().isEmpty()) {
-                    Snackbar.make(v, "You must provide name.", Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
 
-                        }
-                    }).show();
-                } else if (edtTxtContactNumber.getText().toString().trim().isEmpty()) {
-                    Snackbar.make(v, "You must provide number.", Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
+                if (btnAddContact.getText().toString().equals(getString(R.string.add_contact))) {
 
-                        }
-                    }).show();
+                    if (edtTxtContactName.getText().toString().trim().isEmpty()) {
+                        Snackbar.make(v, "You must provide name.", Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                            }
+                        }).show();
+                    } else if (edtTxtContactNumber.getText().toString().trim().isEmpty()) {
+                        Snackbar.make(v, "You must provide number.", Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                            }
+                        }).show();
+                    } else {
+                        isButtonClicked = true;
+                        snackView = v;
+                        inm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                        addContact();
+                    }
+                } else if (btnAddContact.getText().toString().equals(getString(R.string.update_contact))) {
+                    String strName = edtTxtContactName.getText().toString();
+                    String strNumber = edtTxtContactNumber.getText().toString();
+                    String strEmail = edtTxtContactEmail.getText().toString();
+                    imgContactPhoto.setDrawingCacheEnabled(true);
+                    Bitmap bitmap = imgContactPhoto.getDrawingCache();
+
+                    if(updateContact(cID,strName,strNumber,strEmail,bitmap)){
+                        Snackbar.make(v, "Contact updated successfully.", Snackbar.LENGTH_LONG).show();
+                    }else{
+                        Snackbar.make(v, "Failed to update contact.", Snackbar.LENGTH_LONG).show();
+                    }
+
                 } else {
-                    isButtonClicked = true;
-                    snackView = v;
-                    inm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                    addContact();
+                    Snackbar.make(v, "Some internal error occured, Please try after some time.", Snackbar.LENGTH_LONG).show();
                 }
 
             }
@@ -282,6 +318,63 @@ public class AddContactActivity extends AppCompatActivity {
         }
     }
 
+    boolean updateContact(String contactID, String contactName, String contactNumber,String contactEmailAdd,Bitmap bitmap) {
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        ops.add(ContentProviderOperation
+                .newUpdate(ContactsContract.Data.CONTENT_URI)
+                .withSelection(ContactsContract.Data.CONTACT_ID + "=? AND " + ContactsContract.Data.MIMETYPE
+                        + "=?", new String[]{contactID, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE})
+                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, contactName)
+                .build());
+
+        ops.add(ContentProviderOperation
+                .newUpdate(ContactsContract.Data.CONTENT_URI)
+                .withSelection(ContactsContract.Data.CONTACT_ID + "=? AND " + ContactsContract.Data.MIMETYPE
+                        + "=? AND " + ContactsContract.CommonDataKinds.Organization.TYPE + "=?"
+                        , new String[]{contactID, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+                        , String.valueOf(ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)})
+                .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, contactNumber)
+                .build());
+        ops.add(ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
+                .withSelection(ContactsContract.Data.CONTACT_ID + "=? AND " + ContactsContract.Data.MIMETYPE
+                        + "=? AND " + ContactsContract.CommonDataKinds.Organization.TYPE + "=?"
+                        , new String[]{contactID, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE
+                        , String.valueOf(Email.TYPE_WORK)})
+                .withValue(Email.ADDRESS, contactEmailAdd)
+                .build());
+        try
+        {
+            ByteArrayOutputStream image = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, image);
+
+            ops.add(ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
+                    .withSelection(ContactsContract.Data.CONTACT_ID + "=? AND " +
+                    ContactsContract.Data.MIMETYPE + "=?", new String[]{contactID, Photo.CONTENT_ITEM_TYPE})
+                    .withValue(ContactsContract.Data.IS_SUPER_PRIMARY, 1)
+                    .withValue(Photo.PHOTO, image.toByteArray())
+                    .build());
+
+            /*Builder builder;
+            builder = ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI);
+            builder.withSelection(ContactsContract.Data.CONTACT_ID + "=?" + " AND " + ContactsContract.Data.MIMETYPE + "=?",
+                    new String[]{contactID, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE});
+            builder.withValue(ContactsContract.CommonDataKinds.Photo.PHOTO, image.toByteArray());
+            ops.add(builder.build());*/
+        }
+
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        try {
+            getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -299,6 +392,12 @@ public class AddContactActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }
+        switch (id){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+
         }
         if (id == R.id.action_save) {
             if(edtTxtContactName.getText().toString().trim().isEmpty()){
@@ -319,4 +418,8 @@ public class AddContactActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 }

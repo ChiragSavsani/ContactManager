@@ -12,9 +12,9 @@
         <ImageView
             android:id="@+id/imgDefaultContact"
             android:layout_width="55dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp"
             android:layout_height="60dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginTop="2dp"
             android:scaleType="fitXY"
             android:src="@drawable/default_contact" />
 
@@ -28,24 +28,23 @@
                 android:id="@+id/txtContactName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
                 android:text="Contact Manager"
-                android:textSize="15dp"
+                android:textSize="20dp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/txtContactNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
                 android:text="+911111111111"
-                android:textSize="10dp" />
+                android:textSize="15dp" />
+
             <TextView
                 android:id="@+id/txtContactEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="contact.manager@gmail.com"
-                android:textSize="10dp" />
+                android:textSize="15dp" />
         </LinearLayout>
     </LinearLayout>
 

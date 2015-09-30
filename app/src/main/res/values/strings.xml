@@ -2,4 +2,6 @@
     <string name="app_name">ContactManager</string>
     <string name="action_settings">Settings</string>
     <string name="action_save">Save</string>
+    <string name="add_contact">Add Contact</string>
+    <string name="update_contact">Update Contact</string>
 </resources>
