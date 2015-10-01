@@ -30,7 +30,11 @@ This is example of ContactManager with use of ContentProvider and Material Desig
 
 ![Main Fragment](https://github.com/ChiragSavsani/ContactManager/blob/master/app/src/main/res/ui_screen_image/snack_bar.png)
 
-###### 5. Delete Contact using LongPress on RecyclerView
+###### 5. Manage Contact using LongPress on RecyclerView
 
-![Navigation Drawer Menu](https://github.com/ChiragSavsani/ContactManager/blob/master/app/src/main/res/ui_screen_image/delete_contact.png)
+![Navigation Drawer Menu](https://github.com/ChiragSavsani/ContactManager/blob/master/app/src/main/res/ui_screen_image/manage_contact_dialog.png)
+
+###### 6. Update Contact to Screen
+
+![Add Contact](https://github.com/ChiragSavsani/ContactManager/blob/master/app/src/main/res/ui_screen_image/update_contact_screen.png)
 
