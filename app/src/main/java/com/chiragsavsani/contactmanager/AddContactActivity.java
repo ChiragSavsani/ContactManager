@@ -57,8 +57,9 @@ public class AddContactActivity extends AppCompatActivity {
     Bitmap rotateBitmap;
     InputMethodManager inm;
     public static boolean isUpdate;
-    String cID,cName,cNumber,cEmail;
+    String cID, cName, cNumber, cEmail;
     Bitmap cPhoto;
+    public boolean FLAG = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -76,7 +77,7 @@ public class AddContactActivity extends AppCompatActivity {
         btnAddContact = (Button) findViewById(R.id.btnAddContact);
         inm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        if(isUpdate){
+        if (isUpdate) {
             cID = getIntent().getExtras().getString("cID");
             cName = getIntent().getExtras().getString("cName");
             cNumber = getIntent().getExtras().getString("cNumber");
@@ -87,7 +88,9 @@ public class AddContactActivity extends AppCompatActivity {
             edtTxtContactNumber.setText(cNumber);
             edtTxtContactEmail.setText(cEmail);
             imgContactPhoto.setImageBitmap(cPhoto);
-        }else{
+            FLAG = false;
+
+        } else {
             btnAddContact.setText(getString(R.string.add_contact));
         }
         btnAddContact.setOnClickListener(new View.OnClickListener() {
@@ -123,9 +126,9 @@ public class AddContactActivity extends AppCompatActivity {
                     imgContactPhoto.setDrawingCacheEnabled(true);
                     Bitmap bitmap = imgContactPhoto.getDrawingCache();
 
-                    if(updateContact(cID,strName,strNumber,strEmail,bitmap)){
+                    if (updateContact(cID, strName, strNumber, strEmail, bitmap)) {
                         Snackbar.make(v, "Contact updated successfully.", Snackbar.LENGTH_LONG).show();
-                    }else{
+                    } else {
                         Snackbar.make(v, "Failed to update contact.", Snackbar.LENGTH_LONG).show();
                     }
 
@@ -255,7 +258,7 @@ public class AddContactActivity extends AppCompatActivity {
                 .withValue(RawContacts.ACCOUNT_NAME, null)
                 .build());
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        if(rotateBitmap!=null) {    // If an image is selected successfully
+        if (rotateBitmap != null) {    // If an image is selected successfully
             rotateBitmap.compress(Bitmap.CompressFormat.PNG, 75, stream);
 
             // For insert Photo in the ContactsContract.Data
@@ -295,7 +298,7 @@ public class AddContactActivity extends AppCompatActivity {
         try {
             // Executing all the insert operations as a single database transaction
             getContentResolver().applyBatch(ContactsContract.AUTHORITY, insertOperation);
-            if(isButtonClicked == true){
+            if (isButtonClicked == true) {
                 edtTxtContactName.setText("");
                 edtTxtContactNumber.setText("");
                 edtTxtContactEmail.setText("");
@@ -306,7 +309,7 @@ public class AddContactActivity extends AppCompatActivity {
 
                     }
                 }).show();
-            }else{
+            } else {
                 Toast.makeText(getBaseContext(), "Contact is successfully added", Toast.LENGTH_SHORT).show();
                 finish();
             }
@@ -318,7 +321,7 @@ public class AddContactActivity extends AppCompatActivity {
         }
     }
 
-    boolean updateContact(String contactID, String contactName, String contactNumber,String contactEmailAdd,Bitmap bitmap) {
+    boolean updateContact(String contactID, String contactName, String contactNumber, String contactEmailAdd, Bitmap bitmap) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         ops.add(ContentProviderOperation
                 .newUpdate(ContactsContract.Data.CONTENT_URI)
@@ -342,14 +345,13 @@ public class AddContactActivity extends AppCompatActivity {
                         , String.valueOf(Email.TYPE_WORK)})
                 .withValue(Email.ADDRESS, contactEmailAdd)
                 .build());
-        try
-        {
+        try {
             ByteArrayOutputStream image = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, image);
 
             ops.add(ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
                     .withSelection(ContactsContract.Data.CONTACT_ID + "=? AND " +
-                    ContactsContract.Data.MIMETYPE + "=?", new String[]{contactID, Photo.CONTENT_ITEM_TYPE})
+                            ContactsContract.Data.MIMETYPE + "=?", new String[]{contactID, Photo.CONTENT_ITEM_TYPE})
                     .withValue(ContactsContract.Data.IS_SUPER_PRIMARY, 1)
                     .withValue(Photo.PHOTO, image.toByteArray())
                     .build());
@@ -360,15 +362,12 @@ public class AddContactActivity extends AppCompatActivity {
                     new String[]{contactID, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE});
             builder.withValue(ContactsContract.CommonDataKinds.Photo.PHOTO, image.toByteArray());
             ops.add(builder.build());*/
-        }
-
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         try {
             getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -379,6 +378,15 @@ public class AddContactActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.add_contact_menu, menu);
+
+        MenuItem item = menu.findItem(R.id.action_save);
+        if (FLAG) {
+            item.setVisible(true);
+            this.invalidateOptionsMenu();
+        } else {
+            item.setVisible(false);
+            this.invalidateOptionsMenu();
+        }
         return true;
     }
 
@@ -388,25 +396,25 @@ public class AddContactActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-        switch (id){
+        switch (id) {
             case android.R.id.home:
                 onBackPressed();
                 return true;
 
         }
         if (id == R.id.action_save) {
-            if(edtTxtContactName.getText().toString().trim().isEmpty()){
+
+            if (edtTxtContactName.getText().toString().trim().isEmpty()) {
                 Toast.makeText(getApplicationContext(), "You must provide name.", Toast.LENGTH_LONG).show();
 
-            }else if(edtTxtContactNumber.getText().toString().trim().isEmpty()){
+            } else if (edtTxtContactNumber.getText().toString().trim().isEmpty()) {
                 Toast.makeText(getApplicationContext(), "You must provide number.", Toast.LENGTH_LONG).show();
 
-            }else{
+            } else {
                 inm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
                 isButtonClicked = false;
                 addContact();
@@ -414,7 +422,6 @@ public class AddContactActivity extends AppCompatActivity {
 
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
